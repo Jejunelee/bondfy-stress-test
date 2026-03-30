@@ -163,7 +163,7 @@ import {
       <div className="bg-slate-900/60 backdrop-blur-sm border border-slate-800 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-purple-500 rounded-full" /> Earnings by Party (Including Referrals)
+            <span className="w-1.5 h-4 bg-purple-500 rounded-full" /> Earnings by Party (Including Partners)
           </h2>
           
           {/* Year Slider */}
@@ -198,10 +198,10 @@ import {
             <div className="bg-slate-800/40 rounded-lg p-3 text-center border border-slate-700">
               <div className="text-[10px] font-mono text-slate-400 uppercase">Bondfy Gross</div>
               <div className="text-sm font-bold text-green-400">{formatCurrency(selectedData.BondfyBase)}</div>
-              <div className="text-[9px] text-slate-500">before referrals</div>
+              <div className="text-[9px] text-slate-500">before partners</div>
             </div>
             <div className="bg-slate-800/40 rounded-lg p-3 text-center border border-slate-700">
-              <div className="text-[10px] font-mono text-slate-400 uppercase">Referral Fees</div>
+              <div className="text-[10px] font-mono text-slate-400 uppercase">Partner Fees</div>
               <div className="text-sm font-bold text-orange-400">{formatCurrency(selectedData.ReferralFees)}</div>
               <div className="text-[9px] text-slate-500">{nRefs} deals</div>
             </div>
@@ -254,7 +254,7 @@ import {
             <Line 
               type="monotone" 
               dataKey="BondfyNet" 
-              name="Bondfy Net (After Referrals)" 
+              name="Bondfy Net (After Partner Share)" 
               stroke="#A855F7" 
               strokeWidth={3}
               dot={{ r: 5, fill: "#A855F7" }}
@@ -287,11 +287,11 @@ import {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-              <span>Referral Fees: Paid to referral partners</span>
+              <span>Partner Fees: Paid to partners</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span>Bondfy Net: Gross - Referral Fees</span>
+              <span>Bondfy Net: Gross - Partner Fees</span>
             </div>
           </div>
         </div>
