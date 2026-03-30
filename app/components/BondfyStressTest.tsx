@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { ScenarioButtons } from "./components/ScenarioButtons";
 import { DealParametersPanel } from "./DealParametersPanel";
 import { RevenueStreamsPanel } from "./components/RevenueStreamsPanel";
@@ -10,19 +11,22 @@ import { RevenueStreamsDisplay } from "./components/RevenueStreamsDisplay";
 import { LifecycleChart } from "./LifeCycleChart";
 import { PartyEarnings } from "./components/PartyEarnings";
 import { SecondaryMarketSummary } from "./components/SecondaryMarketSummary";
+import { EarningsChart } from "./components/EarningsChart";
+import { CumulativeEarningsChart } from "./components/CumulativeEarningsChart";
 import { useCoreMetrics } from "./hooks/useCoreMetrics";
 import { useReferralMetrics } from "./hooks/useReferralMetrics";
+import { useBondContext } from "../contexts/BondContext";
 import { formatCurrency, formatPercent } from "./utils/formatters";
 import { SCENARIOS, ScenarioKey } from "./constants";
 import { TrancheMode, LifecycleYear } from "./types";
 
 export default function BondfyStressTest() {
+  // Use shared bond context
+  const { bondSize: bond, tenor, couponRate, setBondSize, setTenor, setCouponRate } = useBondContext();
+  
   // Core parameters
-  const [bond, setBond] = useState(400_000_000);
-  const [tenor, setTenor] = useState(7);
   const [maRate, setMaRate] = useState(0.03);
   const [bondfyShareOfMA, setBondfyShareOfMA] = useState(0.01);
-  const [couponRate, setCouponRate] = useState(0.06);
   const [cashoutVolumePct, setCashoutVolumePct] = useState(0.10);
   const [secondaryVolumePct, setSecondaryVolumePct] = useState(0.15);
   const [secondarySaleFee, setSecondarySaleFee] = useState(0.0025);
@@ -30,6 +34,9 @@ export default function BondfyStressTest() {
   // Referral state
   const [nRefs, setNRefs] = useState(3);
   const [trancheMode, setTrancheMode] = useState<TrancheMode>("split");
+  
+  // Chart state
+  const [selectedYear, setSelectedYear] = useState(1);
 
   // Core Calculations
   const coreMetrics = useCoreMetrics({
@@ -64,14 +71,15 @@ export default function BondfyStressTest() {
   // Scenario handler
   const setScenario = (scenario: ScenarioKey) => {
     const p = SCENARIOS[scenario];
-    setBond(p.bond);
+    setBondSize(p.bond);
     setTenor(p.tenor);
+    setCouponRate(p.couponRate);
     setMaRate(p.maRate);
     setBondfyShareOfMA(p.bondfyShareOfMA);
-    setCouponRate(p.couponRate);
     setCashoutVolumePct(p.cashoutVolumePct);
     setSecondaryVolumePct(p.secondaryVolumePct);
     setSecondarySaleFee(p.secondarySaleFee);
+    setSelectedYear(1);
   };
 
   return (
@@ -85,7 +93,28 @@ export default function BondfyStressTest() {
             </h1>
             <p className="text-slate-400 text-sm mt-1">LGU Bond Revenue Stress Test</p>
           </div>
-          <ScenarioButtons onSelect={setScenario} />
+          <div className="flex gap-3">
+            <Link 
+              href="/investor"
+              className="px-4 py-2 text-sm font-mono rounded-full border border-green-500/30 hover:border-green-500/70 hover:text-green-400 transition-all"
+            >
+              Investor View →
+            </Link>
+            <div className="flex gap-2">
+              {(["small", "mid", "large", "mega"] as const).map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setScenario(s)}
+                  className="px-3 py-1.5 text-xs font-mono uppercase tracking-wider rounded-full border border-slate-700 hover:border-blue-500/50 hover:text-blue-400 transition-all"
+                >
+                  {s === "small" && "Small LGU"}
+                  {s === "mid" && "Mid City"}
+                  {s === "large" && "Large City"}
+                  {s === "mega" && "Mega Deal"}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -96,7 +125,7 @@ export default function BondfyStressTest() {
               tenor={tenor}
               maRate={maRate}
               bondfyShareOfMA={bondfyShareOfMA}
-              onBondChange={setBond}
+              onBondChange={setBondSize}
               onTenorChange={setTenor}
               onMaRateChange={setMaRate}
               onBondfyShareChange={setBondfyShareOfMA}
@@ -149,6 +178,41 @@ export default function BondfyStressTest() {
               grandTotal={coreMetrics.grandTotal}
               tenor={coreMetrics.tenor}
               bondfyShareOfMA={coreMetrics.bondfyShareOfMA}
+            />
+
+            {/* Earnings Chart with Referrals */}
+            <EarningsChart
+              bond={bond}
+              tenor={tenor}
+              maRate={maRate}
+              bondfyShareOfMA={bondfyShareOfMA}
+              couponRate={couponRate}
+              cashoutVolumePct={cashoutVolumePct}
+              secondaryVolumePct={secondaryVolumePct}
+              secondarySaleFee={secondarySaleFee}
+              nRefs={nRefs}
+              trancheMode={trancheMode}
+              referralMetrics={referralMetrics}
+              coreMetrics={coreMetrics}
+              selectedYear={selectedYear}
+              onYearChange={setSelectedYear}
+            />
+
+            {/* Cumulative Earnings Chart */}
+            <CumulativeEarningsChart
+              bond={bond}
+              tenor={tenor}
+              maRate={maRate}
+              bondfyShareOfMA={bondfyShareOfMA}
+              couponRate={couponRate}
+              cashoutVolumePct={cashoutVolumePct}
+              secondaryVolumePct={secondaryVolumePct}
+              secondarySaleFee={secondarySaleFee}
+              nRefs={nRefs}
+              trancheMode={trancheMode}
+              referralMetrics={referralMetrics}
+              coreMetrics={coreMetrics}
+              selectedYear={selectedYear}
             />
 
             {/* Year-by-Year */}
